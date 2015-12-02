@@ -1422,6 +1422,9 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	for(int k=1;k<=BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) BC_sumtrkpt_ratio_jetpt->SetBinContent(k,BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
 	BC_sumtrkpt_ratio_jetpt->Write();
 	BC_stack_grades_jpt->Write();
+	TH1D* frag_sumtrkpt_ratio_jetpt = new TH1D("frag_sumtrkpt_ratio_jetpt","frag_sumtrkpt_ratio_jetpt;jet_pt (MeV);ratio", 300, 0, 3e6);
+	for(int k=1;k<=frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) frag_sumtrkpt_ratio_jetpt->SetBinContent(k,frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
+	frag_sumtrkpt_ratio_jetpt->Write();
 	BC_stack_grades_bHLxy->Write();
 	BC_leadOrder_vs_tvSize->Write();
 	BC_leadOrder_vs_tvSize->ProfileX("_pfx",1,-1,"s")->Write();
