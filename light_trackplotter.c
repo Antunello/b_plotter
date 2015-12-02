@@ -439,8 +439,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	TH2D* Btruth_tracks_vs_jetpt = new TH2D("Btruth_tracks_vs_jetpt","Btruth_tracks_vs_jetpt;Jet Pt (MeV); IP3D trk", 100, 0, 3e+6, 31, -0.5, 30.5); Btruth_tracks_vs_jetpt->Sumw2();
 	TH2D* Btruth_tracks_vs_bHLxy = new TH2D("Btruth_tracks_vs_bHLxy","Btruth_tracks_vs_bHLxy;bH_Lxy; IP3D trk", 300, -0.5, 300.5, 31, -0.5, 30.5); Btruth_tracks_vs_bHLxy->Sumw2();
 
-	TH2D* B_trkpt_vs_jetpt = new TH2D("B_trkpt_vs_jetpt","B_trkpt_vs_jetpt;Jet Pt (MeV); trk_pt/jet_pt  ", 100, 0, 3e+6, 300, 0, 1); B_trkpt_vs_jetpt->Sumw2();
-	TH2D* B_trkpt_vs_jetpt_log = new TH2D("B_trkpt_vs_jetpt_log","B_trkpt_vs_jetpt_log;Jet Pt (MeV); log10(trk_pt/jet_pt)  ", 100, 0, 3e+6, 100, -3, 1); B_trkpt_vs_jetpt_log->Sumw2();
+	TH2D* BC_trkpt_vs_jetpt = new TH2D("BC_trkpt_vs_jetpt","BC_trkpt_vs_jetpt;Jet Pt (MeV); trk_pt/jet_pt  ", 100, 0, 3e+6, 300, 0, 1); BC_trkpt_vs_jetpt->Sumw2();
+	TH2D* BC_trkpt_vs_jetpt_log = new TH2D("BC_trkpt_vs_jetpt_log","BC_trkpt_vs_jetpt_log;Jet Pt (MeV); log10(trk_pt/jet_pt)  ", 100, 0, 3e+6, 100, -3, 1); BC_trkpt_vs_jetpt_log->Sumw2();
 	TH2F* B_npixVsbH_Lxy = new TH2F("B_npixVsbH_Lxy","B_npixVsbH_Lxy; bH_Lxy; pixel hit", 201, -0.5, 200.5,11, -0.5, 10.5);
 	TH2F* B_npixVsjetpt = new TH2F("B_npixVsjetpt","B_npixVsjetpt; jet pt; pixel hit", 100, 0, 3e6, 11, -0.5, 10.5);
 	TH2D* frag_trkpt_vs_jetpt = new TH2D("frag_trkpt_vs_jetpt","frag_trkpt_vs_jetpt;Jet Pt (MeV); trk_pt/jet_pt ", 100, 0, 3e+6, 300, 0, 1); frag_trkpt_vs_jetpt->Sumw2();
@@ -838,8 +838,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 							n_bc_ip3d_trk++;
 							B_IP3D_npixVsjetpt->Fill(jet_pt->at(i), (jet_trk_nPixHits->at(i))[k]);
 							B_IP3D_npixVsbH_Lxy->Fill(bH_Lxy->at(i), (jet_trk_nPixHits->at(i))[k]);
-							B_trkpt_vs_jetpt->Fill(jet_pt->at(i),(trk_pt[k]/jet_pt->at(i)));
-							B_trkpt_vs_jetpt_log->Fill(jet_pt->at(i),log10(trk_pt[k]/jet_pt->at(i)));
+							BC_trkpt_vs_jetpt->Fill(jet_pt->at(i),(trk_pt[k]/jet_pt->at(i)));
+							BC_trkpt_vs_jetpt_log->Fill(jet_pt->at(i),log10(trk_pt[k]/jet_pt->at(i)));
 							vtx_B->Fill(vtx_X[k],vtx_Y[k]);
 							B_d0vsjetpt_ip3d_sel->Fill(jet_pt->at(i), d0[k] );
 							B_z0sinthetavsjetpt_ip3d_sel->Fill(jet_pt->at(i), (z0[k]-(PVz))*sin(theta[k]));
@@ -1019,7 +1019,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	c1->Divide(2,2);
 	c1->cd(1);
 	B_IP3DtrkVsJetPt->Draw("colz");
-	//B_trkpt_vs_jetpt->Draw("colz");
+	//BC_trkpt_vs_jetpt->Draw("colz");
 	c1->cd(2);
 	//TProfile* prof = B_IP3DtrkVsJetPt->ProfileX("_pfx",1,-1,"s");
 	//prof->SetLineColor(kGreen+3);
@@ -1449,10 +1449,10 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	BC_IP3DtrkVsbHLxy->ProfileX("_pfx",1,-1,"s")->Write();
 	BC_trkVsbHLxy->Write();
 	BC_trkVsbHLxy->ProfileX("_pfx",1,-1,"s")->Write();
-	B_trkpt_vs_jetpt->Write();
-	B_trkpt_vs_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
-	B_trkpt_vs_jetpt_log->Write();
-	B_trkpt_vs_jetpt_log->ProfileX("_pfx",1,-1,"s")->Write();
+	BC_trkpt_vs_jetpt->Write();
+	BC_trkpt_vs_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
+	BC_trkpt_vs_jetpt_log->Write();
+	BC_trkpt_vs_jetpt_log->ProfileX("_pfx",1,-1,"s")->Write();
 	TProfile* prof = B_IP3DtrkVsJetPt->ProfileX("_pfx",1,-1,"s");
 	Btruth_tracks_vs_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
 	Btruth_tracks_vs_jetpt->Write();
