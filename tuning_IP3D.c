@@ -207,8 +207,8 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 										1.8105e-1 * pow(jet_pt->at(i)*1e-6,8) +
 										-1.25372e-2 * pow(jet_pt->at(i)*1e-6,9));
 			for(int ok=0; ok<jet_btag_ntrk->at(i); ok++){
-			//	int k = idx_trkdz0sig[ok];
-				int k = idx_trkpt[ok];
+				int k = idx_trkdz0sig[ok];
+				//int k = idx_trkpt[ok];
 				/*if(jet_trk_pt->at(i)[k] > r_cut *jet_pt->at(i))*/
 				if(ok < n_cut )tool->fillTrack(jet_trk_ip3d_grade->at(i)[k],jet_trk_ip3d_d0sig->at(i)[k],jet_trk_ip3d_z0sig->at(i)[k], jet_GhostL_HadF->at(i));
 

@@ -781,8 +781,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					double BC_sumtrk_pt = 0.;
 					double frag_sumtrk_pt = 0.;
 					for(unsigned int ok =0; ok<trk_size; ok++){
-						int k = idx_trkpt[ok];
-						//int k = idx_trkdz0sig[ok];
+						//int k = idx_trkpt[ok];
+						int k = idx_trkdz0sig[ok];
 						double d0_sin = TMath::Sin( (bH_phi->at(i) - jet_trk_phi->at(i)[k]) * (TMath::Pi()/180.));
 						double z0_sin = TMath::Sin( (bH_eta->at(i) - jet_trk_eta->at(i)[k]) * (TMath::Pi()/180.));
 						//std::cout<<trk_dz0sig_vec[k]<<"\t"<<k<<"\t"<<ok<<std::endl;
@@ -984,8 +984,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					}
 					//for(unsigned int k =0; k<trk_pt.size(); k++){
 					for(unsigned int ok =0; ok<trk_pt.size(); ok++){
-						int k = idx_trkpt[ok];
-						//int k = idx_trkdz0sig[ok];
+						//int k = idx_trkpt[ok];
+						int k = idx_trkdz0sig[ok];
 						int ta = trk_algo[k];
 						bool nPixCut = ((jet_trk_nPixHits->at(i))[k]>=2 && jet_pt->at(i) < 4e5) || ((jet_trk_nPixHits->at(i))[k]>=0 && jet_pt->at(i) >= 4e5);
 						//bool lead_cut = (trk_pt.size() > 10 &&ok < ts * trk_pt.size());
