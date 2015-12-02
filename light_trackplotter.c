@@ -1109,7 +1109,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	std::stringstream ls;
 	ls<<"ip3d_llr_minpt"<<min_pt<<"_maxpt"<<max_pt;	
 	ROC_graph->SetName(ls.str().c_str());
-	ROC_graph->SetTitle("ip3d_llr;eff_b;rej_l");
+	ROC_graph->SetTitle("ip3d_llr; b-tagging efficiency;Light-jet rejection");
 	c_ROC_graph->SetTitle(ss.str().c_str());
 	c_ROC_graph->SetName(s.str().c_str());
 	c_ROC_graph->SetMarkerColor(kRed);
@@ -1534,7 +1534,9 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	h_l_jet_pt->Scale(1./(double)h_l_jet_pt->Integral());	
 	h_b_jet_pt->Write();
 	h_l_jet_pt->Write();
-
+	c2->Write();
+	c3->Write();
+	c55->Write();
 	output_sum->Close();
 }
 
