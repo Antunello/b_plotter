@@ -403,12 +403,14 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 
 	TH1D* BC_d0sig = new TH1D("BC_d0sig","BC_d0sig;d0sig",300, -150,150);
 	TH2D* BC_sumtrkpt_jetpt = new TH2D("BC_sumtrkpt_jetpt","BC_sumtrkpt_jetpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); BC_sumtrkpt_jetpt->Sumw2();
+	TH2D* BC_sumtrkpt_bHpt = new TH2D("BC_sumtrkpt_bHpt","BC_sumtrkpt_bHpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); BC_sumtrkpt_bHpt->Sumw2();
 	TH1D* BC_z0sig = new TH1D("BC_z0sig","BC_z0sig;z0sig",300, -150,150);
 	TH1D* BC_dz0sig = new TH1D("BC_dz0sig","BC_dz0sig;dz0sig",300, 0,300);
 	TH1D* BC_trkpt = new TH1D("BC_trkpt","BC_trkpt;trkpt",300, 0,3e6);
 	TH2D* BC_d0sig_vs_z0sig = new TH2D("BC_d0sig_vs_z0sig","BC_d0sig_vs_z0sig;d0sig;z0sig",300,-150,150,300,-150,150);
 	TH1D* frag_d0sig = new TH1D("frag_d0sig","frag_d0sig;d0sig",300, -150,150);
 	TH2D* frag_sumtrkpt_jetpt = new TH2D("frag_sumtrkpt_jetpt","frag_sumtrkpt_jetpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); frag_sumtrkpt_jetpt->Sumw2();
+	TH2D* frag_sumtrkpt_bHpt = new TH2D("frag_sumtrkpt_bHpt","frag_sumtrkpt_bHpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); frag_sumtrkpt_bHpt->Sumw2();
 	TH1D* frag_z0sig = new TH1D("frag_z0sig","frag_z0sig;z0sig",300, -150,150);
 	TH1D* frag_dz0sig = new TH1D("frag_dz0sig","frag_dz0sig;dz0sig",300, 0,300);
 	TH1D* frag_trkpt = new TH1D("frag_trkpt","frag_trkpt;trkpt",300, 0,3e6);
@@ -663,6 +665,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 		b_eventnb->GetEntry(ientry);
 		for(int i = 0; i < njets; i++){
 			b_jet_pt->GetEntry(ientry);
+			b_bH_pt->GetEntry(ientry);
 			b_jet_truthMatch->GetEntry(ientry);
 			b_jet_aliveAfterOR->GetEntry(ientry);
   		if (jet_truthMatch  ->at(i)!=1) continue;
@@ -925,8 +928,16 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 						}
 					}
 					//else std::cout<<"Numb Trk in Jet higher than cut: "<< ip3d_d0sig_sel.size()  <<std::endl;
-					if(BC_sumtrk_pt)BC_sumtrkpt_jetpt->Fill(jet_pt->at(i), BC_sumtrk_pt);
-					if(frag_sumtrk_pt)frag_sumtrkpt_jetpt->Fill(jet_pt->at(i), frag_sumtrk_pt);
+					if(BC_sumtrk_pt){
+						BC_sumtrkpt_jetpt->Fill(jet_pt->at(i), BC_sumtrk_pt);
+						BC_sumtrkpt_bHpt->Fill(bH_pt->at(i), BC_sumtrk_pt);
+
+					}
+					if(frag_sumtrk_pt){
+						frag_sumtrkpt_jetpt->Fill(jet_pt->at(i), frag_sumtrk_pt);
+						frag_sumtrkpt_bHpt->Fill(bH_pt->at(i), frag_sumtrk_pt);
+
+					}
 					Btruth_tracks_vs_jetpt->Fill(jet_pt->at(i), bH_nBtracks->at(i) + bH_nCtracks->at(i));
 					Btruth_tracks_vs_bHLxy->Fill( bH_Lxy->at(i) , bH_nBtracks->at(i) + bH_nCtracks->at(i));
 
@@ -1124,10 +1135,12 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	ROC_graph->GetXaxis()->SetRangeUser(0.4,1.0);	
 	ROC_graph->Draw("AP");
 	c_ROC_graph->Draw("Psame");
+	
 	WP->SetMarkerStyle(30);
 	WP->SetMarkerColor(kOrange);
 	WP->SetMarkerSize(2);
 	WP->Draw("Psame");
+	gPad->BuildLegend();
 	c2->cd(2);
 	gPad->SetPad(0.00,0.00,0.4,0.35);
 	gPad->SetTopMargin(0);
@@ -1159,15 +1172,17 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	llr_stack->Draw("nostack");
 	//ip3d_llr_distro_l->Draw();
 	//ip3d_llr_distro_b->Draw("same");
-
+	gPad->SetLogy();
 	//custom_ip3d_llr_distro_b->Draw("same");
 	//custom_ip3d_llr_distro_l->Draw("same");
 
-	TLegend* leg = new TLegend(0.1,0.7,0.48,0.9);
+	TLegend* leg = new TLegend(0.4,0.7,0.9,0.9);
 	leg->AddEntry(custom_ip3d_llr_distro_b, "Custom Ip3d B-jets");
 	leg->AddEntry(custom_ip3d_llr_distro_l, "Custom Ip3d L-jets");
 	leg->AddEntry(ip3d_llr_distro_b, "Ip3d B-jets");
 	leg->AddEntry(ip3d_llr_distro_l, "Ip3d L-jets");
+	leg->SetBorderSize(0);
+	leg->SetFillStyle(0);
 	leg->Draw();
 
 
@@ -1418,15 +1433,25 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 
 	BC_sumtrkpt_jetpt->Write();
 	BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
+	BC_sumtrkpt_bHpt->Write();
+	BC_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->Write();
 	frag_sumtrkpt_jetpt->Write();
 	frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
+	frag_sumtrkpt_bHpt->Write();
+	frag_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->Write();
 	TH1D* BC_sumtrkpt_ratio_jetpt = new TH1D("BC_sumtrkpt_ratio_jetpt","BC_sumtrkpt_ratio_jetpt;jet_pt (MeV);ratio", 300, 0, 3e6);
 	for(int k=1;k<=BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) BC_sumtrkpt_ratio_jetpt->SetBinContent(k,BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
 	BC_sumtrkpt_ratio_jetpt->Write();
+	TH1D* BC_sumtrkpt_ratio_bHpt = new TH1D("BC_sumtrkpt_ratio_bHpt","BC_sumtrkpt_ratio_bHpt;bH_pt (MeV);ratio", 300, 0, 3e6);
+	for(int k=1;k<=BC_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) BC_sumtrkpt_ratio_bHpt->SetBinContent(k,BC_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(BC_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
+	BC_sumtrkpt_ratio_bHpt->Write();
 	BC_stack_grades_jpt->Write();
 	TH1D* frag_sumtrkpt_ratio_jetpt = new TH1D("frag_sumtrkpt_ratio_jetpt","frag_sumtrkpt_ratio_jetpt;jet_pt (MeV);ratio", 300, 0, 3e6);
 	for(int k=1;k<=frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) frag_sumtrkpt_ratio_jetpt->SetBinContent(k,frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(frag_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
 	frag_sumtrkpt_ratio_jetpt->Write();
+	TH1D* frag_sumtrkpt_ratio_bHpt = new TH1D("frag_sumtrkpt_ratio_bHpt","frag_sumtrkpt_ratio_bHpt;bH_pt (MeV);ratio", 300, 0, 3e6);
+	for(int k=1;k<=frag_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) frag_sumtrkpt_ratio_bHpt->SetBinContent(k,frag_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(frag_sumtrkpt_bHpt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
+	frag_sumtrkpt_ratio_bHpt->Write();
 	BC_stack_grades_bHLxy->Write();
 	BC_leadOrder_vs_tvSize->Write();
 	BC_leadOrder_vs_tvSize->ProfileX("_pfx",1,-1,"s")->Write();
