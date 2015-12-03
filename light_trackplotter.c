@@ -311,6 +311,7 @@ TH1D* GetRatio(TGraphAsymmErrors* new_roc, TGraphAsymmErrors* old_roc){
 	ratio->GetXaxis()->SetLabelSize(axis_size);
 	ratio->GetYaxis()->SetLabelSize(axis_size);
 	ratio->GetYaxis()->SetTitleOffset(0.7);
+	ratio->GetXaxis()->SetRangeUser(0.4,1.0);
 	//ratio->GetYaxis()->SetRangeUser(0.,7.);
 	return ratio;
 }
@@ -1120,6 +1121,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	ROC_graph->SetMarkerSize(0.2);
 	ROC_graph->Draw("AP");
 	ROC_graph->GetYaxis()->SetRangeUser(1,1e+6);	
+	ROC_graph->GetXaxis()->SetRangeUser(0.4,1.0);	
 	ROC_graph->Draw("AP");
 	c_ROC_graph->Draw("Psame");
 	WP->SetMarkerStyle(30);
