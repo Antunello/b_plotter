@@ -144,7 +144,7 @@ void initBranches(TChain* myChain){
 	myChain->SetBranchStatus("jet_eta",1);
 	myChain->SetBranchStatus("jet_phi",1);
 	myChain->SetBranchStatus("jet_truthflav",1);
-	myChain->SetBranchStatus("jet_GhostL_HadF",1);
+	myChain->SetBranchStatus("jet_LabDr_HadF",1);
 	myChain->SetBranchStatus("jet_trk_ip3d_llr",1);
 	myChain->SetBranchStatus("jet_ip3d_llr",1);
 	myChain->SetBranchStatus("jet_trk_vtx_X",1);
@@ -400,6 +400,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 //	init_d0sig_grades(frag_d0sig_grades, "frag");
 //	init_d0sig_grades(light_d0sig_grades, "light");
 
+	TH2D* bHpt_vs_jet_pt = new TH2D("bHpt_vs_jet_pt","bHpt_vs_jet_pt;jet_pt [MeV],bH_pt [MeV]", 300, 0, 3e6, 300, 0, 3e6);
 
 	TH1D* BC_d0sig = new TH1D("BC_d0sig","BC_d0sig;d0sig",300, -150,150);
 	TH2D* BC_sumtrkpt_jetpt = new TH2D("BC_sumtrkpt_jetpt","BC_sumtrkpt_jetpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); BC_sumtrkpt_jetpt->Sumw2();
@@ -558,7 +559,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	std::vector<float> *jet_phi = 0;
 	std::vector<int> *jet_truthMatch = 0;
 	std::vector<int> *jet_truthflav = 0;
-	std::vector<int> *jet_GhostL_HadF = 0;
+	std::vector<int> *jet_LabDr_HadF = 0;
 	Int_t njets = 0;
 	Int_t eventnb = 0;
 	std::vector<float> *jet_ip3d_llr = 0;	
@@ -594,7 +595,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	std::vector<int> *jet_aliveAfterOR =0;   
 	std::vector<float> *bH_dRjet = 0;
 
-	TBranch *b_PVx, *b_PVy, *b_PVz, *b_bH_dRjet, *b_jet_btag_ntrk, *b_eventnb,*b_jet_aliveAfterOR, *b_njets, *b_jet_pt,*b_jet_E, *b_jet_eta, *b_jet_phi, *b_jet_truthMatch,*b_jet_GhostL_HadF, *b_jet_truthflav, *b_jet_ip3d_llr, *b_jet_trk_ip3d_llr;
+	TBranch *b_PVx, *b_PVy, *b_PVz, *b_bH_dRjet, *b_jet_btag_ntrk, *b_eventnb,*b_jet_aliveAfterOR, *b_njets, *b_jet_pt,*b_jet_E, *b_jet_eta, *b_jet_phi, *b_jet_truthMatch,*b_jet_LabDr_HadF, *b_jet_truthflav, *b_jet_ip3d_llr, *b_jet_trk_ip3d_llr;
 	TBranch *b_jet_trk_d0, *b_jet_trk_ip3d_d0, *b_jet_trk_d0_truth,*b_jet_trk_nPixHits,*b_jet_trk_nSCTHits, *b_jet_trk_ip3d_d0sig, *b_jet_trk_vtx_X, *b_jet_trk_vtx_Y, *b_jet_trk_pt;
 	TBranch *b_jet_trk_z0, *b_jet_trk_ip3d_z0, *b_jet_trk_z0_truth, *b_jet_trk_ip3d_z0sig, *b_jet_trk_phi, *b_jet_trk_eta, *b_jet_trk_theta;
 	TBranch *b_bH_Lxy, *b_bH_x, *b_bH_y, *b_bH_z, *b_bH_pt, *b_bH_eta, *b_bH_nBtracks, *b_bH_nCtracks, *b_bH_phi, *b_jet_jf_ntrkAtVx, *b_jet_sv1_Nvtx, *b_jet_jf_nvtx,*b_jet_sv1_ntrkv,*b_jet_ip3d_ntrk;
@@ -607,7 +608,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
   myChain->SetBranchAddress("jet_phi", &jet_phi, &b_jet_phi);
 	myChain->SetBranchAddress("jet_truthMatch", &jet_truthMatch, &b_jet_truthMatch);
 	myChain->SetBranchAddress("jet_truthflav", &jet_truthflav, &b_jet_truthflav);
-	myChain->SetBranchAddress("jet_GhostL_HadF", &jet_GhostL_HadF, &b_jet_GhostL_HadF);
+	myChain->SetBranchAddress("jet_LabDr_HadF", &jet_LabDr_HadF, &b_jet_LabDr_HadF);
 	myChain->SetBranchAddress("jet_ip3d_llr", &jet_ip3d_llr, &b_jet_ip3d_llr);
 	myChain->SetBranchAddress("jet_trk_ip3d_llr", &jet_trk_ip3d_llr, &b_jet_trk_ip3d_llr);
 	myChain->SetBranchAddress("jet_trk_vtx_X", &jet_trk_vtx_X, &b_jet_trk_vtx_X);
@@ -672,7 +673,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
   		if (jet_aliveAfterOR->at(i)!=1) continue;
   		if (jet_pt->at(i)<25e3)         continue;
 			b_jet_truthflav->GetEntry(ientry);
-			b_jet_GhostL_HadF->GetEntry(ientry);
+			b_jet_LabDr_HadF->GetEntry(ientry);
 			b_jet_ip3d_llr->GetEntry(ientry);
 			
 			//jpt_frac = ( 0.0553861 - 5.46001e-8* pow(jet_pt->at(i),1) + 2.85982e-14 * pow(jet_pt->at(i),2) + 5.69244e-21 * pow(jet_pt->at(i),3) + 1.75064e-28*pow(jet_pt->at(i),4) );
@@ -709,12 +710,12 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			TMath::Sort(int (jet_trk_ip3d_d0sig->at(i).size()), trk_dz0sig_vec, idx_trkdz0sig);
 			//std::cout<<(long double)jpt_frac<<"\t"<< jet_pt->at(i)<<std::endl;
 			//if(jet_truthflav->at(i) == jet_flav){
-			if(jet_GhostL_HadF->at(i) == jet_flav){
+			if(jet_LabDr_HadF->at(i) == jet_flav){
 				b_jet_eta->GetEntry(ientry);
 				h_b_jet_pt->Fill(jet_pt->at(i));
 				if(jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 && jet_pt->at(i) > 25e3 &&  abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
 
-					
+					bHpt_vs_jet_pt->Fill(jet_pt->at(i),bH_pt->at(i));					
 
 					b_jet_trk_d0->GetEntry(ientry);
 					b_jet_trk_z0->GetEntry(ientry);
@@ -956,7 +957,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					frag_IP3DtrkVsJetPt->Fill(jet_pt->at(i),n_frag_ip3d_trk);	
 				}
 			//}else if(jet_truthflav->at(i) == light_flav){
-			}else if(jet_GhostL_HadF->at(i) == light_flav){
+			}else if(jet_LabDr_HadF->at(i) == light_flav){
 				h_l_jet_pt->Fill(jet_pt->at(i));
 				b_jet_truthMatch->GetEntry(ientry);
 				b_jet_eta->GetEntry(ientry);
@@ -1377,6 +1378,11 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	B_nPixHitsvsnSiHits->Write();
 	B_IP3D_nPixHitsvsnSiHits->Write();
 
+	bHpt_vs_jet_pt->Write();
+	bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->Write();
+	TH1D* bHpt_ratio_jetpt = new TH1D("bHpt_ratio_jetpt","bHpt_ratio_jetpt;jet_pt (MeV);ratio", 300, 0, 3e6);
+	for(int k=1;k<=bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) bHpt_ratio_jetpt->SetBinContent(k,bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
+	bHpt_ratio_jetpt->Write();
 
 	std::cout<<"Number of b+c tracks:\t"<<n_b_tracks<<std::endl;
 	std::cout<<"Number of b+c selected tracks:\t"<<n_b_sel_tracks<<std::endl;
@@ -1430,7 +1436,6 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	frag_d0sig_custom->Write();
 	frag_z0sig_custom->Write();
 	frag_d0sig_vs_z0sig_custom->Write();
-
 	BC_sumtrkpt_jetpt->Write();
 	BC_sumtrkpt_jetpt->ProfileX("_pfx",1,-1,"s")->Write();
 	BC_sumtrkpt_bHpt->Write();
