@@ -404,6 +404,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 //	init_d0sig_grades(light_d0sig_grades, "light");
 
 	TH2D* bHpt_vs_jet_pt = new TH2D("bHpt_vs_jet_pt","bHpt_vs_jet_pt;jet_pt [MeV];bH_pt [MeV]", 300, 0, 3e6, 300, 0, 3e6);
+	TH2D* bHptratio_vs_jet_pt = new TH2D("bHptratio_vs_jet_pt","bHptratio_vs_jet_pt;jet_pt [MeV];bH_pt [MeV]", 300, 0, 3e6, 300, 0, 10);
 
 	TH1D* BC_d0sig = new TH1D("BC_d0sig","BC_d0sig;d0sig",300, -150,150);
 	TH2D* BC_sumtrkpt_jetpt = new TH2D("BC_sumtrkpt_jetpt","BC_sumtrkpt_jetpt;jet_pt (MeV); sumtrk_pt (MeV)",300, 0, 3e6, 300, 0 ,3e6); BC_sumtrkpt_jetpt->Sumw2();
@@ -731,6 +732,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 				if(jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 && jet_pt->at(i) > 25e3 &&  abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
 
 					bHpt_vs_jet_pt->Fill(jet_pt->at(i),bH_pt->at(i));					
+					bHptratio_vs_jet_pt->Fill(jet_pt->at(i),bH_pt->at(i)/jet_pt->at(i));					
 
 					b_jet_trk_d0->GetEntry(ientry);
 					b_jet_trk_z0->GetEntry(ientry);
@@ -1211,32 +1213,62 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 
 
 	TCanvas *c3 = new TCanvas("eff_plot","eff_plot", 1200, 400); 
-	c3->Divide(3,1);
+	c3->Divide(3,2);
 	c3->cd(1);
-	//gPad->SetPad(0.4,0.00,0.7,0.4);
+	gPad->SetPad(0.0,0.00,0.33,1.0);
 
 	cust_ip3d_llr.set_flat_cut();
 	std_ip3d_llr.set_flat_cut();
 
 	for(int m=0; m<cust_ip3d_llr.nbin; m++){
-		double eb = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
-		if(eb>-0.1)cust_ip3d_llr.b_eff->SetBinContent(m+1,eb);	
+		double num = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX());
+		double den = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double eb = num/den;
+
+//		double eb = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double err_eb = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );//cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		if(eb>-0.1){
+			cust_ip3d_llr.b_eff->SetBinContent(m+1,eb);	
+			cust_ip3d_llr.b_eff->SetBinError(m+1,err_eb);
+		}
 		//std::cout<<"eb: "<<eb<<std::endl;
 	}
 	for(int m=0; m<std_ip3d_llr.nbin; m++){
-		double eb = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
-		if(eb>-0.1)std_ip3d_llr.b_eff->SetBinContent(m+1,eb);	
+		double num = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX());
+		double den = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double eb = num/den;//std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double err_eb = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );//cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		if(eb>-0.1){
+			std_ip3d_llr.b_eff->SetBinContent(m+1,eb);	
+			std_ip3d_llr.b_eff->SetBinError(m+1,err_eb);
+		}
 		//std::cout<<"eb: "<<eb<<std::endl;
 	}
 
 	for(int m=0; m<cust_ip3d_llr.nbin; m++){
-		double eb = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
-		if(eb>-0.1)cust_ip3d_llr.b_eff_flat->SetBinContent(m+1,eb);	
+		double num = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX());
+		double den = cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+
+		double eb = num/den;//cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double err_eb = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );//cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		if(eb>-0.1){
+			cust_ip3d_llr.b_eff_flat->SetBinContent(m+1,eb);	
+			cust_ip3d_llr.b_eff_flat->SetBinError(m+1,err_eb);
+		}
 		//std::cout<<"eb: "<<eb<<std::endl;
 	}
 	for(int m=0; m<std_ip3d_llr.nbin; m++){
-		double eb = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
-		if(eb>-0.1)std_ip3d_llr.b_eff_flat->SetBinContent(m+1,eb);	
+		
+		double num = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX());
+		double den = std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+
+
+		double eb = num/den;//std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.b_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.b_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.b_ip3d_llr_ptbin[m]->Integral();
+		double err_eb = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );
+		if(eb>-0.1){
+			std_ip3d_llr.b_eff_flat->SetBinContent(m+1,eb);	
+			std_ip3d_llr.b_eff_flat->SetBinError(m+1,err_eb);
+		}
 		//std::cout<<"eb: "<<eb<<std::endl;
 	}
 
@@ -1246,50 +1278,95 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	cust_ip3d_llr.b_eff->SetMarkerColor(kRed);
 	cust_ip3d_llr.b_eff->SetMarkerStyle(22);
 	cust_ip3d_llr.b_eff->SetMarkerSize(0.5);
-	cust_ip3d_llr.b_eff->Draw("PL");	
+	cust_ip3d_llr.b_eff->Rebin(4);
+	cust_ip3d_llr.b_eff->Scale(0.25);
+	cust_ip3d_llr.b_eff->GetXaxis()->SetRangeUser(0,2e6);//Scale(0.25);
+	cust_ip3d_llr.b_eff->Draw("PLE");	
 	std_ip3d_llr.b_eff->SetLineColor(kBlack);
 	//std_ip3d_llr.b_eff->SetLineStyle(2);
 	std_ip3d_llr.b_eff->SetMarkerColor(kBlack);
 	std_ip3d_llr.b_eff->SetMarkerStyle(21);
 	std_ip3d_llr.b_eff->SetMarkerSize(0.5);
-	std_ip3d_llr.b_eff->Draw("PLsame");
+	std_ip3d_llr.b_eff->Rebin(4);
+	std_ip3d_llr.b_eff->Scale(0.25);
+	std_ip3d_llr.b_eff->Draw("PLEsame");
 	cust_ip3d_llr.b_eff_flat->SetLineColor(kRed);
 	cust_ip3d_llr.b_eff_flat->SetMarkerColor(kRed);
 	cust_ip3d_llr.b_eff_flat->SetMarkerStyle(26);
 	cust_ip3d_llr.b_eff_flat->SetLineStyle(2);
 	cust_ip3d_llr.b_eff_flat->SetMarkerSize(0.5);
-	cust_ip3d_llr.b_eff_flat->Draw("PLsame");	
+	cust_ip3d_llr.b_eff_flat->Rebin(4);
+	cust_ip3d_llr.b_eff_flat->Scale(0.25);
+	cust_ip3d_llr.b_eff_flat->Draw("PLEsame");	
 	std_ip3d_llr.b_eff_flat->SetLineColor(kBlack);
 	std_ip3d_llr.b_eff_flat->SetLineStyle(2);
 	std_ip3d_llr.b_eff_flat->SetMarkerColor(kBlack);
 	std_ip3d_llr.b_eff_flat->SetMarkerStyle(25);
 	std_ip3d_llr.b_eff_flat->SetMarkerSize(0.5);
-	std_ip3d_llr.b_eff_flat->Draw("PLsame");
-
+	std_ip3d_llr.b_eff_flat->Rebin(4);
+	std_ip3d_llr.b_eff_flat->Scale(0.25);
+	std_ip3d_llr.b_eff_flat->Draw("PLEsame");
 
 	c3->cd(2);
-	//gPad->SetPad(0.7,0.00,1.,0.4);
+	gPad->SetPad(0,0,0,0);
+
+	c3->cd(3);
+	gPad->SetPad(0.33,1.00,0.66,0.33);
 	gPad->SetLogy();
+	gPad->SetBottomMargin(0);
+	gPad->SetLeftMargin(0.2);
 
 
 
 	for(int m=0;m<cust_ip3d_llr.nbin; m++){
-		double el = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
-		if(el > 0)cust_ip3d_llr.l_rej->SetBinContent(m+1,1/el);	
+		double den = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX());
+		double num = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		double lr = num/den;
+		double err_lr = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );
+		double el = den/num;//cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.seventy_ip3d_cut),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		if(el > 0){
+			cust_ip3d_llr.l_rej->SetBinContent(m+1,lr);	
+			cust_ip3d_llr.l_rej->SetBinError(m+1,err_lr);
+		}
 	}
 	for(int m=0; m<std_ip3d_llr.nbin; m++){
-		double el = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
-		if(el > 0)std_ip3d_llr.l_rej->SetBinContent(m+1,1/el);	
+		double den = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX());
+		double num = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		double lr = num/den;
+		double err_lr = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );
+		double el = den/num;
+		//double el = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.seventy_ip3d_cut),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		if(el > 0){
+			std_ip3d_llr.l_rej->SetBinContent(m+1,lr);	
+			std_ip3d_llr.l_rej->SetBinError(m+1,err_lr);
+		}
 	}
 	
 
 	for(int m=0;m<cust_ip3d_llr.nbin; m++){
-		double el = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
-		if(el > 0)cust_ip3d_llr.l_rej_flat->SetBinContent(m+1,1/el);	
+		double den = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX());
+		double num = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		double lr = num/den;
+		double err_lr = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );
+		double el = den/num;//cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		//double el = cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(cust_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(cust_ip3d_llr.v_flat_cut[m]),cust_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /cust_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		if(el > 0){
+			cust_ip3d_llr.l_rej_flat->SetBinContent(m+1,lr);	
+			cust_ip3d_llr.l_rej_flat->SetBinError(m+1,err_lr);	
+		}
 	}
 	for(int m=0; m<std_ip3d_llr.nbin; m++){
-		double el = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
-		if(el > 0)std_ip3d_llr.l_rej_flat->SetBinContent(m+1,1/el);	
+		double den = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX());
+		double num = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		double lr = num/den;
+		double err_lr = sqrt( pow(sqrt(num)/den,2) + pow( (num/pow(den,2)) *sqrt(den) ,2) );
+		double el = den/num;//std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		//double el = std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral(std_ip3d_llr.l_ip3d_llr_ptbin[m]->FindBin(std_ip3d_llr.v_flat_cut[m]),std_ip3d_llr.l_ip3d_llr_ptbin[m]->GetNbinsX()) /std_ip3d_llr.l_ip3d_llr_ptbin[m]->Integral();
+		if(el > 0){
+			std_ip3d_llr.l_rej_flat->SetBinContent(m+1,lr);	
+			std_ip3d_llr.l_rej_flat->SetBinError(m+1,err_lr);	
+
+		}
 	}
 
 
@@ -1299,27 +1376,108 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	cust_ip3d_llr.l_rej->SetMarkerColor(kRed);
 	cust_ip3d_llr.l_rej->SetMarkerStyle(22);
 	cust_ip3d_llr.l_rej->SetMarkerSize(0.5);
-	cust_ip3d_llr.l_rej->Draw("PL");	
+	cust_ip3d_llr.l_rej->Rebin(4);
+	cust_ip3d_llr.l_rej->Scale(0.25);
+	cust_ip3d_llr.l_rej->GetYaxis()->SetTitleSize(0.05);
+	cust_ip3d_llr.l_rej->GetYaxis()->SetLabelSize(0.05);
+	cust_ip3d_llr.l_rej->GetXaxis()->SetLabelSize(0.0);
+	cust_ip3d_llr.l_rej->GetXaxis()->SetRangeUser(0,2e6);//GetYaxis()->SetLabelSize(0.05);
+	cust_ip3d_llr.l_rej->GetYaxis()->SetTitle("Light-jet rejection (fix cut)");
+	cust_ip3d_llr.l_rej->SetTitle("");
+	cust_ip3d_llr.l_rej->Draw("PLE");	
+	
 	std_ip3d_llr.l_rej->SetLineColor(kBlack);
 	//std_ip3d_llr.l_rej->SetLineStyle(2);
 	std_ip3d_llr.l_rej->SetMarkerColor(kBlack);
 	std_ip3d_llr.l_rej->SetMarkerStyle(21);
 	std_ip3d_llr.l_rej->SetMarkerSize(0.5);
-	std_ip3d_llr.l_rej->Draw("PLsame");
+	std_ip3d_llr.l_rej->Rebin(4);
+	std_ip3d_llr.l_rej->Scale(0.25);
+	std_ip3d_llr.l_rej->Draw("PLEsame");
 
-	c3->cd(3);
-	cust_ip3d_llr.l_rej_flat->SetLineStyle(2);
+	TLegend* leg_fix = new TLegend(0.6,0.9,0.9,0.7);
+	leg_fix->SetBorderSize(0);
+	leg_fix->SetFillStyle(0);
+	leg_fix->AddEntry(cust_ip3d_llr.l_rej,"new tuning","PL");
+	leg_fix->AddEntry(std_ip3d_llr.l_rej,"standard tuning","PL");
+	leg_fix->Draw();
+
+	c3->cd(4);
+	gPad->SetTopMargin(0);
+	gPad->SetBottomMargin(0.2);
+	gPad->SetLeftMargin(0.2);
+	gPad->SetPad(0.33,0.33,0.66,0.0);
+	TH1D* l_rej_ratio_fix = new TH1D(*cust_ip3d_llr.l_rej);
+	l_rej_ratio_fix->Divide(std_ip3d_llr.l_rej);
+	l_rej_ratio_fix->SetLineColor(kRed);
+	l_rej_ratio_fix->SetMarkerColor(kRed);
+	l_rej_ratio_fix->SetMarkerStyle(22);
+	l_rej_ratio_fix->SetMarkerSize(0.5);
+	l_rej_ratio_fix->GetXaxis()->SetTitleSize(0.1);
+	l_rej_ratio_fix->GetXaxis()->SetLabelSize(0.1);
+	l_rej_ratio_fix->GetXaxis()->SetRangeUser(0,2e6);//GetXaxis()->SetLabelSize(0.1);
+	l_rej_ratio_fix->GetYaxis()->SetTitleSize(0.1);
+	l_rej_ratio_fix->GetYaxis()->SetTitleOffset(0.5);
+	l_rej_ratio_fix->GetYaxis()->SetLabelSize(0.1);
+	l_rej_ratio_fix->GetYaxis()->SetTitle("ratio");
+	l_rej_ratio_fix->SetTitle("");
+	l_rej_ratio_fix->Draw("PLE");
+	gPad->SetGridy();
+
+	c3->cd(5);
+	gPad->SetPad(0.66,1.00,1.0,0.33);
+	gPad->SetLogy();
+	gPad->SetBottomMargin(0);
+	gPad->SetLeftMargin(0.2);
+	//cust_ip3d_llr.l_rej_flat->SetLineStyle(2);
 	cust_ip3d_llr.l_rej_flat->SetLineColor(kRed);
 	cust_ip3d_llr.l_rej_flat->SetMarkerColor(kRed);
-	cust_ip3d_llr.l_rej_flat->SetMarkerStyle(26);
+	cust_ip3d_llr.l_rej_flat->SetMarkerStyle(22);
 	cust_ip3d_llr.l_rej_flat->SetMarkerSize(0.5);
-	cust_ip3d_llr.l_rej_flat->Draw("PL");	
+	cust_ip3d_llr.l_rej_flat->Rebin(4);
+	cust_ip3d_llr.l_rej_flat->Scale(0.25);
+	cust_ip3d_llr.l_rej_flat->GetYaxis()->SetTitleSize(0.05);
+	cust_ip3d_llr.l_rej_flat->GetYaxis()->SetLabelSize(0.05);
+	cust_ip3d_llr.l_rej_flat->GetXaxis()->SetLabelSize(0.0);
+	cust_ip3d_llr.l_rej_flat->GetXaxis()->SetRangeUser(0,2e6);//->SetLabelSize(0.05);
+	cust_ip3d_llr.l_rej_flat->GetYaxis()->SetTitle("Light-jet rejection (flat cut)");
+	cust_ip3d_llr.l_rej_flat->SetTitle("");
+	cust_ip3d_llr.l_rej_flat->Draw("PLE");	
 	std_ip3d_llr.l_rej_flat->SetLineColor(kBlack);
-	std_ip3d_llr.l_rej_flat->SetLineStyle(2);
+	//std_ip3d_llr.l_rej_flat->SetLineStyle(2);
 	std_ip3d_llr.l_rej_flat->SetMarkerColor(kBlack);
-	std_ip3d_llr.l_rej_flat->SetMarkerStyle(25);
+	std_ip3d_llr.l_rej_flat->SetMarkerStyle(21);
 	std_ip3d_llr.l_rej_flat->SetMarkerSize(0.5);
-	std_ip3d_llr.l_rej_flat->Draw("PLsame");
+	std_ip3d_llr.l_rej_flat->Rebin(4);
+	std_ip3d_llr.l_rej_flat->Scale(0.25);
+	std_ip3d_llr.l_rej_flat->Draw("PLEsame");
+	TLegend* leg_flat = new TLegend(0.6,0.9,0.9,0.7);
+	leg_flat->SetBorderSize(0);
+	leg_flat->SetFillStyle(0);
+	leg_flat->AddEntry(cust_ip3d_llr.l_rej_flat,"new tuning","PL");
+	leg_flat->AddEntry(std_ip3d_llr.l_rej_flat,"standard tuning","PL");
+	leg_flat->Draw();
+	c3->cd(6);
+	gPad->SetTopMargin(0);
+	gPad->SetBottomMargin(0.2);
+	gPad->SetLeftMargin(0.2);
+	gPad->SetPad(0.66,0.33,1.0,0.0);
+	TH1D* l_rej_ratio_flat = new TH1D(*cust_ip3d_llr.l_rej_flat);
+	l_rej_ratio_flat->Divide(std_ip3d_llr.l_rej_flat);
+	l_rej_ratio_flat->SetLineColor(kRed);
+	l_rej_ratio_flat->SetMarkerColor(kRed);
+	l_rej_ratio_flat->SetMarkerStyle(22);
+	l_rej_ratio_flat->SetMarkerSize(0.5);
+	l_rej_ratio_flat->GetXaxis()->SetTitleSize(0.1);
+	l_rej_ratio_flat->GetXaxis()->SetLabelSize(0.1);
+	l_rej_ratio_flat->GetXaxis()->SetRangeUser(0,2e6);//)LabelSize(0.1);
+	l_rej_ratio_flat->GetYaxis()->SetTitleSize(0.1);
+	l_rej_ratio_flat->GetYaxis()->SetTitleOffset(0.5);
+	l_rej_ratio_flat->GetYaxis()->SetLabelSize(0.1);
+	l_rej_ratio_flat->GetYaxis()->SetTitle("ratio");
+	l_rej_ratio_flat->SetTitle("");
+	l_rej_ratio_flat->Draw("PLE");
+	gPad->SetGridy();
 
 	TCanvas *c55 = new TCanvas("IP3D_LLR_pt","IP3D_LLr_pt",1200,400);
 
@@ -1407,6 +1565,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	TH1D* bHpt_ratio_jetpt = new TH1D("bHpt_ratio_jetpt","bHpt_ratio_jetpt;jet_pt (MeV);ratio", 300, 0, 3e6);
 	for(int k=1;k<=bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetNbinsX();k++) bHpt_ratio_jetpt->SetBinContent(k,bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetBinContent(k)/(bHpt_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->GetBinCenter(k)+1));
 	bHpt_ratio_jetpt->Write();
+	bHptratio_vs_jet_pt->Write();
+	bHptratio_vs_jet_pt->ProfileX("_pfx",1,-1,"s")->Write();
 
 	std::cout<<"Number of b+c tracks:\t"<<n_b_tracks<<std::endl;
 	std::cout<<"Number of b+c selected tracks:\t"<<n_b_sel_tracks<<std::endl;
