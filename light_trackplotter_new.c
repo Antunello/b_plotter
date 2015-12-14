@@ -548,10 +548,10 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	IPxDStandaloneTool *tool = new IPxDStandaloneTool();
 	//IPxDTrainingTool *tool = new IPxDTrainingTool();
 	//tool->initTrainingMode(14);
-	//tool->initEvaluationModeDB( "/afs/cern.ch/atlas/groups/perf-flavtag/ReferenceHistograms/BTagCalibRUN2-08-05.root","AntiKt4EMTopo", grades);
+	tool->initEvaluationMode("/afs/cern.ch/atlas/groups/perf-flavtag/ReferenceHistograms/BTagCalibRUN2-08-05.root","AntiKt4EMTopo", grades);
 	//tool->initEvaluationMode(14,"/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/ip3d_tuning.root");
 	//tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/BTagCalibRUN2-08-15_cand.root","AntiKt4EMTopo",grades);
-	tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/ip3d_tuning_new.root","AntiKt4EMTopo",grades);
+	//tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/ip3d_tuning_new.root","AntiKt4EMTopo",grades);
 	
 
 	std::cout<<"Chain Entries:"<<myChain->GetEntries()<<std::endl;
@@ -571,6 +571,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	std::vector<float> *bH_pt = 0;
 	std::vector<float> *jet_pt = 0;
 	std::vector<float> *jet_dRiso = 0;
+	std::vector<float> *jet_JVT = 0;
 	std::vector<float> *jet_E = 0;
 	std::vector<float> *jet_eta = 0;
 	std::vector<float> *jet_phi = 0;
@@ -614,7 +615,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 
 	TBranch *b_PVx, *b_PVy, *b_PVz, *b_bH_dRjet, *b_jet_btag_ntrk, *b_eventnb,*b_jet_aliveAfterOR, *b_njets, *b_jet_pt,*b_jet_E, *b_jet_eta, *b_jet_phi, *b_jet_truthMatch,*b_jet_LabDr_HadF, *b_jet_truthflav, *b_jet_ip3d_llr, *b_jet_trk_ip3d_llr;
 	TBranch *b_jet_trk_d0, *b_jet_trk_ip3d_d0, *b_jet_trk_d0_truth,*b_jet_trk_nPixHits,*b_jet_trk_nSCTHits, *b_jet_trk_ip3d_d0sig, *b_jet_trk_vtx_X, *b_jet_trk_vtx_Y, *b_jet_trk_pt;
-	TBranch *b_jet_trk_z0, *b_jet_trk_ip3d_z0, *b_jet_trk_z0_truth, *b_jet_trk_ip3d_z0sig, *b_jet_dRiso, *b_jet_trk_phi, *b_jet_trk_eta, *b_jet_trk_theta;
+	TBranch *b_jet_trk_z0, *b_jet_trk_ip3d_z0, *b_jet_trk_z0_truth, *b_jet_trk_ip3d_z0sig, *b_jet_JVT, *b_jet_dRiso, *b_jet_trk_phi, *b_jet_trk_eta, *b_jet_trk_theta;
 	TBranch *b_bH_Lxy, *b_bH_x, *b_bH_y, *b_bH_z, *b_bH_pt, *b_bH_eta, *b_bH_nBtracks, *b_bH_nCtracks, *b_bH_phi, *b_jet_jf_ntrkAtVx, *b_jet_sv1_Nvtx, *b_jet_jf_nvtx,*b_jet_sv1_ntrkv,*b_jet_ip3d_ntrk;
 	TBranch *b_jet_trk_nInnHits, *b_jet_trk_nNextToInnHits, *b_jet_trk_ip3d_grade,*b_jet_trk_algo, *b_jet_trk_orig;
 	myChain->SetBranchAddress("njets", &njets, &b_njets);
@@ -646,6 +647,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	myChain->SetBranchAddress("jet_trk_pt", &jet_trk_pt, &b_jet_trk_pt);
 	myChain->SetBranchAddress("jet_trk_eta", &jet_trk_eta, &b_jet_trk_eta);
 	myChain->SetBranchAddress("jet_dRiso", &jet_dRiso, &b_jet_dRiso);
+	myChain->SetBranchAddress("jet_JVT", &jet_JVT, &b_jet_JVT);
 	myChain->SetBranchAddress("jet_trk_phi", &jet_trk_phi, &b_jet_trk_phi);
 	myChain->SetBranchAddress("PVx", &PVx, &b_PVx);
 	myChain->SetBranchAddress("PVy", &PVy, &b_PVy);
@@ -717,7 +719,9 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			b_jet_phi->GetEntry(ientry);
 			b_jet_eta->GetEntry(ientry);
 			b_jet_dRiso->GetEntry(ientry);			
+			b_jet_JVT->GetEntry(ientry);			
 			//if (jet_dRiso->at(i)<0.6) continue;
+			if (abs(jet_JVT->at(i))<0.641) continue;
 
 			Int_t idx_trkpt[jet_trk_pt->at(i).size()];
 			float *trk_pt_vec = &(jet_trk_pt->at(i)[0]);
