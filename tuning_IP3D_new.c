@@ -57,6 +57,7 @@ void initBranches(TChain* myChain){
 	myChain->SetBranchStatus("bH_eta",1);
 	myChain->SetBranchStatus("njets",1);
 	myChain->SetBranchStatus("jet_pt",1);
+	myChain->SetBranchStatus("jet_eta",1);
 	myChain->SetBranchStatus("jet_E",1);
 	myChain->SetBranchStatus("jet_truthMatch",1);
 	myChain->SetBranchStatus("jet_eta",1);
@@ -131,6 +132,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 	initBranches(myChain);
 	
 	std::vector<float> *jet_pt = 0;
+	std::vector<float> *jet_eta = 0;
 	std::vector<int> *jet_truthMatch = 0;
 	std::vector<int> *jet_truthflav = 0;
 	std::vector<int> *jet_LabDr_HadF = 0;
@@ -143,11 +145,12 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 	std::vector<int> *jet_btag_ntrk = 0;
 	std::vector<int> *jet_aliveAfterOR =0;   
 
-	TBranch *b_njets, *b_eventnb, *b_jet_pt,*b_jet_trk_pt, *b_jet_truthMatch,*b_jet_truthflav,*b_jet_LabDr_HadF, *b_jet_trk_ip3d_d0sig, *b_jet_trk_ip3d_z0sig, *b_jet_trk_ip3d_grade, *b_jet_btag_ntrk, *b_jet_aliveAfterOR;
+	TBranch *b_njets, *b_eventnb, *b_jet_pt,*b_jet_eta ,*b_jet_trk_pt, *b_jet_truthMatch,*b_jet_truthflav,*b_jet_LabDr_HadF, *b_jet_trk_ip3d_d0sig, *b_jet_trk_ip3d_z0sig, *b_jet_trk_ip3d_grade, *b_jet_btag_ntrk, *b_jet_aliveAfterOR;
 
 	myChain->SetBranchAddress("njets", &njets, &b_njets);
 	myChain->SetBranchAddress("eventnb", &eventnb, &b_eventnb);
   myChain->SetBranchAddress("jet_pt", &jet_pt, &b_jet_pt);
+  myChain->SetBranchAddress("jet_eta", &jet_eta, &b_jet_eta);
   myChain->SetBranchAddress("jet_trk_pt", &jet_trk_pt, &b_jet_trk_pt);
 	myChain->SetBranchAddress("jet_truthMatch", &jet_truthMatch, &b_jet_truthMatch);
 	myChain->SetBranchAddress("jet_truthflav", &jet_truthflav, &b_jet_truthflav);
@@ -168,6 +171,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 		b_eventnb->GetEntry(ientry);
 		for(int i = 0; i<njets; i++){
 			b_jet_pt->GetEntry(ientry);
+			b_jet_eta->GetEntry(ientry);
 			b_jet_trk_pt->GetEntry(ientry);
 			b_jet_truthMatch->GetEntry(ientry);
 			b_jet_aliveAfterOR->GetEntry(ientry);
