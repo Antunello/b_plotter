@@ -689,9 +689,14 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			b_bH_pt->GetEntry(ientry);
 			b_jet_truthMatch->GetEntry(ientry);
 			b_jet_aliveAfterOR->GetEntry(ientry);
-  		if (jet_truthMatch  ->at(i)!=1) continue;
+  		//if (jet_truthMatch  ->at(i)!=1) continue;
   		if (jet_aliveAfterOR->at(i)!=1) continue;
   		if (jet_pt->at(i)<25e3)         continue;
+			b_jet_dRiso->GetEntry(ientry);			
+			b_jet_JVT->GetEntry(ientry);			
+			b_jet_eta->GetEntry(ientry);
+			//if (jet_dRiso->at(i)<0.6) continue;
+			if (abs(jet_JVT->at(i))<0.641 && jet_pt->at(i)<50e3 && abs(jet_eta->at(i))<2.4) continue;
 			b_jet_truthflav->GetEntry(ientry);
 			b_jet_LabDr_HadF->GetEntry(ientry);
 			b_jet_ip3d_llr->GetEntry(ientry);
@@ -717,11 +722,6 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			b_jet_trk_eta->GetEntry(ientry);
 			b_jet_trk_phi->GetEntry(ientry);	
 			b_jet_phi->GetEntry(ientry);
-			b_jet_eta->GetEntry(ientry);
-			b_jet_dRiso->GetEntry(ientry);			
-			b_jet_JVT->GetEntry(ientry);			
-			//if (jet_dRiso->at(i)<0.6) continue;
-			if (abs(jet_JVT->at(i))<0.641) continue;
 
 			Int_t idx_trkpt[jet_trk_pt->at(i).size()];
 			float *trk_pt_vec = &(jet_trk_pt->at(i)[0]);
@@ -742,7 +742,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			if(jet_LabDr_HadF->at(i) == jet_flav){
 				b_jet_eta->GetEntry(ientry);
 				h_b_jet_pt->Fill(jet_pt->at(i));
-				if(jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 && jet_pt->at(i) > 25e3 &&  abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
+				if(/*jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 &&*/ jet_pt->at(i) > 25e3 &&  abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
 
 					bHpt_vs_jet_pt->Fill(jet_pt->at(i),bH_pt->at(i));					
 					bHptratio_vs_jet_pt->Fill(jet_pt->at(i),bH_pt->at(i)/jet_pt->at(i));					
@@ -1004,7 +1004,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 				b_jet_pt->GetEntry(ientry);
 				b_bH_Lxy->GetEntry(ientry);
 				b_jet_aliveAfterOR->GetEntry(ientry);
-				if(jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 && abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
+				if(/*jet_truthMatch->at(i) ==1 && jet_aliveAfterOR->at(i) ==1 &&*/ abs(jet_eta->at(i)) < eta_cut && jet_pt->at(i)>min_pt && jet_pt->at(i)<max_pt){
 				
 					b_jet_trk_d0->GetEntry(ientry);
 					b_jet_trk_ip3d_d0->GetEntry(ientry);
