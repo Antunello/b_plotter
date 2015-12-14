@@ -62,7 +62,7 @@ void initBranches(TChain* myChain){
 	myChain->SetBranchStatus("jet_eta",1);
 	myChain->SetBranchStatus("jet_phi",1);
 	myChain->SetBranchStatus("jet_truthflav",1);
-	myChain->SetBranchStatus("jet_GhostL_HadF",1);
+	myChain->SetBranchStatus("jet_LabDr_HadF",1);
 	myChain->SetBranchStatus("jet_trk_ip3d_llr",1);
 	myChain->SetBranchStatus("jet_ip3d_llr",1);
 	myChain->SetBranchStatus("jet_trk_vtx_X",1);
@@ -133,7 +133,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 	std::vector<float> *jet_pt = 0;
 	std::vector<int> *jet_truthMatch = 0;
 	std::vector<int> *jet_truthflav = 0;
-	std::vector<int> *jet_GhostL_HadF = 0;
+	std::vector<int> *jet_LabDr_HadF = 0;
 	Int_t njets = 0;
 	Int_t eventnb = 0;
 	std::vector<std::vector<float> > *jet_trk_ip3d_d0sig = 0;
@@ -143,7 +143,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 	std::vector<int> *jet_btag_ntrk = 0;
 	std::vector<int> *jet_aliveAfterOR =0;   
 
-	TBranch *b_njets, *b_eventnb, *b_jet_pt,*b_jet_trk_pt, *b_jet_truthMatch,*b_jet_truthflav,*b_jet_GhostL_HadF, *b_jet_trk_ip3d_d0sig, *b_jet_trk_ip3d_z0sig, *b_jet_trk_ip3d_grade, *b_jet_btag_ntrk, *b_jet_aliveAfterOR;
+	TBranch *b_njets, *b_eventnb, *b_jet_pt,*b_jet_trk_pt, *b_jet_truthMatch,*b_jet_truthflav,*b_jet_LabDr_HadF, *b_jet_trk_ip3d_d0sig, *b_jet_trk_ip3d_z0sig, *b_jet_trk_ip3d_grade, *b_jet_btag_ntrk, *b_jet_aliveAfterOR;
 
 	myChain->SetBranchAddress("njets", &njets, &b_njets);
 	myChain->SetBranchAddress("eventnb", &eventnb, &b_eventnb);
@@ -151,7 +151,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
   myChain->SetBranchAddress("jet_trk_pt", &jet_trk_pt, &b_jet_trk_pt);
 	myChain->SetBranchAddress("jet_truthMatch", &jet_truthMatch, &b_jet_truthMatch);
 	myChain->SetBranchAddress("jet_truthflav", &jet_truthflav, &b_jet_truthflav);
-	myChain->SetBranchAddress("jet_GhostL_HadF", &jet_GhostL_HadF, &b_jet_GhostL_HadF);
+	myChain->SetBranchAddress("jet_LabDr_HadF", &jet_LabDr_HadF, &b_jet_LabDr_HadF);
 	myChain->SetBranchAddress("jet_trk_ip3d_z0sig", &jet_trk_ip3d_z0sig, &b_jet_trk_ip3d_z0sig);
 	myChain->SetBranchAddress("jet_trk_ip3d_d0sig", &jet_trk_ip3d_d0sig, &b_jet_trk_ip3d_d0sig);
 	myChain->SetBranchAddress("jet_trk_ip3d_grade", &jet_trk_ip3d_grade, &b_jet_trk_ip3d_grade);
@@ -175,7 +175,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
   		if (jet_aliveAfterOR->at(i)!=1) continue;
   		if (jet_pt->at(i)<25e3)         continue;
 			//b_jet_truthflav->GetEntry(ientry);
-			b_jet_GhostL_HadF->GetEntry(ientry);
+			b_jet_LabDr_HadF->GetEntry(ientry);
 			b_jet_trk_ip3d_d0sig->GetEntry(ientry);
 			b_jet_trk_ip3d_z0sig->GetEntry(ientry);
 			b_jet_trk_ip3d_grade->GetEntry(ientry);
@@ -211,7 +211,7 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 				int k = idx_trkdz0sig[ok];
 				//int k = idx_trkpt[ok];
 				/*if(jet_trk_pt->at(i)[k] > r_cut *jet_pt->at(i))*/
-				if(ok < n_cut )tool->fillTrack(jet_trk_ip3d_grade->at(i)[k],jet_trk_ip3d_d0sig->at(i)[k],jet_trk_ip3d_z0sig->at(i)[k], jet_GhostL_HadF->at(i));
+				if(ok < n_cut )tool->fillTrack(jet_trk_ip3d_grade->at(i)[k],jet_trk_ip3d_d0sig->at(i)[k],jet_trk_ip3d_z0sig->at(i)[k], jet_LabDr_HadF->at(i));
 
 			}
 
