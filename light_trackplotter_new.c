@@ -546,11 +546,12 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	std::vector<std::string> grades = get_track_grades();
 
 	IPxDStandaloneTool *tool = new IPxDStandaloneTool();
-//	IPxDTrainingTool *tool = new IPxDTrainingTool();
+	//IPxDTrainingTool *tool = new IPxDTrainingTool();
 	//tool->initTrainingMode(14);
 	//tool->initEvaluationModeDB( "/afs/cern.ch/atlas/groups/perf-flavtag/ReferenceHistograms/BTagCalibRUN2-08-05.root","AntiKt4EMTopo", grades);
 	//tool->initEvaluationMode(14,"/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/ip3d_tuning.root");
-	tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/BTagCalibRUN2-08-15_cand.root","AntiKt4EMTopo",grades);
+	//tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/BTagCalibRUN2-08-15_cand.root","AntiKt4EMTopo",grades);
+	tool->initEvaluationMode("/afs/cern.ch/user/a/amiucci/B_tagging/xAODAthena/btagIBLAnalysis/macros/ip3d_tuning_new.root","AntiKt4EMTopo",grades);
 	
 
 	std::cout<<"Chain Entries:"<<myChain->GetEntries()<<std::endl;
@@ -716,7 +717,7 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 			b_jet_phi->GetEntry(ientry);
 			b_jet_eta->GetEntry(ientry);
 			b_jet_dRiso->GetEntry(ientry);			
-
+			//if (jet_dRiso->at(i)<0.6) continue;
 
 			Int_t idx_trkpt[jet_trk_pt->at(i).size()];
 			float *trk_pt_vec = &(jet_trk_pt->at(i)[0]);
@@ -811,8 +812,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					double BC_sumtrk_pt = 0.;
 					double frag_sumtrk_pt = 0.;
 					for(unsigned int ok =0; ok<trk_size; ok++){
-						//int k = idx_trkpt[ok];
-						int k = idx_trkdz0sig[ok];
+						int k = idx_trkpt[ok];
+						//int k = idx_trkdz0sig[ok];
 						double d0_sin = TMath::Sin( (bH_phi->at(i) - jet_trk_phi->at(i)[k]) * (TMath::Pi()/180.));
 						double z0_sin = TMath::Sin( (bH_eta->at(i) - jet_trk_eta->at(i)[k]) * (TMath::Pi()/180.));
 						//std::cout<<trk_dz0sig_vec[k]<<"\t"<<k<<"\t"<<ok<<std::endl;
@@ -952,6 +953,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					}
 					float custom_ip3d_llr = tool->getJetLLR(3,ip3d_trk_grade_sel ,ip3d_d0sig_sel, ip3d_z0sig_sel, jet_flav, light_flav);
 
+					
+					if(ientry%1000 == 0) std::cout<<"CUSTOM LLR: "<<custom_ip3d_llr<<"\tSTD LLR: "<<jet_ip3d_llr->at(i)<<std::endl;
 					if(ip3d_d0sig_sel.size()  != 0){
 						custom_ip3d_llr_distro_b->Fill(custom_ip3d_llr);
 						for(int m = 0; m<cust_ip3d_llr.nbin; m++){
@@ -1030,8 +1033,8 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 					}
 					//for(unsigned int k =0; k<trk_pt.size(); k++){
 					for(unsigned int ok =0; ok<trk_pt.size(); ok++){
-						//int k = idx_trkpt[ok];
-						int k = idx_trkdz0sig[ok];
+						int k = idx_trkpt[ok];
+						//int k = idx_trkdz0sig[ok];
 						int ta = trk_algo[k];
 						bool nPixCut =  ((jet_trk_nPixHits->at(i))[k]>=2 && jet_pt->at(i) < 4e5) || ((jet_trk_nPixHits->at(i))[k]>=0 && jet_pt->at(i) >= 4e5);
 						//bool lead_cut = (trk_pt.size() > 10 &&ok < ts * trk_pt.size());
@@ -1208,12 +1211,12 @@ void light_trackplotter(std::string inputFolder, int jet_flav, double ts, float 
 	//ip3d_llr_distro_l->Draw();
 	//ip3d_llr_distro_b->Draw("same");
 	gPad->SetLogy();
-	//custom_ip3d_llr_distro_b->Draw("same");
-	//custom_ip3d_llr_distro_l->Draw("same");
+	custom_ip3d_llr_distro_b->Draw("same");
+	custom_ip3d_llr_distro_l->Draw("same");
 
 	TLegend* leg = new TLegend(0.4,0.7,0.9,0.9);
-//	leg->AddEntry(custom_ip3d_llr_distro_b, "Custom Ip3d B-jets");
-//	leg->AddEntry(custom_ip3d_llr_distro_l, "Custom Ip3d L-jets");
+	leg->AddEntry(custom_ip3d_llr_distro_b, "Custom Ip3d B-jets");
+	leg->AddEntry(custom_ip3d_llr_distro_l, "Custom Ip3d L-jets");
 	leg->AddEntry(ip3d_llr_distro_b, "Ip3d B-jets");
 	leg->AddEntry(ip3d_llr_distro_l, "Ip3d L-jets");
 	leg->SetBorderSize(0);
