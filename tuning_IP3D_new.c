@@ -175,10 +175,10 @@ void tuning_IP3D(std::string inputFolder, double n_cut){
 			b_jet_trk_pt->GetEntry(ientry);
 			b_jet_truthMatch->GetEntry(ientry);
 			b_jet_aliveAfterOR->GetEntry(ientry);
-  		//if (jet_truthMatch  ->at(i)!=1) continue;
+  		//if (jet_truthMatch->at(i)!=1) continue;
   		//if (jet_aliveAfterOR->at(i)!=1) continue;
   		if (jet_pt->at(i)<25e3)         continue;
-			if (jet_eta->at(i)<eta_cut) continue;
+			if (abs(jet_eta->at(i))>eta_cut) continue;
 			//b_jet_truthflav->GetEntry(ientry);
 			b_jet_LabDr_HadF->GetEntry(ientry);
 			b_jet_trk_ip3d_d0sig->GetEntry(ientry);
